@@ -16,28 +16,22 @@ public class TimeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String timezone = (String) request.getParameter("timezone");
-
+        String timezone = request.getParameter("timezone");
         TimeZone timeZoneInstance;
-        if (timezone != null && !timezone.isEmpty()) {
-            if (timezone.startsWith("UTC+")) {
-                int offset = Integer.parseInt(timezone.substring(4));
-                timeZoneInstance = TimeZone.getTimeZone("UTC+" + offset);
-            } else if (timezone.startsWith("UTC-")) {
-                int offset = Integer.parseInt(timezone.substring(4));
-                timeZoneInstance = TimeZone.getTimeZone("UTC-" + offset);
-            } else {
-                timeZoneInstance = TimeZone.getTimeZone("UTC");
-            }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        if (timezone == null){
+            timezone = "UTC";
+            timeZoneInstance = TimeZone.getTimeZone(timezone);
         } else {
-            timeZoneInstance = TimeZone.getTimeZone("UTC");
+            timeZoneInstance = TimeZone.getTimeZone(timezone);
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         dateFormat.setTimeZone(timeZoneInstance);
         String currentTime = dateFormat.format(new Date());
 
         request.setAttribute("currentTime", currentTime);
+        request.setAttribute("timezone", timezone);
         request.getRequestDispatcher("/WEB-INF/jsp/time.jsp").forward(request, response);
     }
 }

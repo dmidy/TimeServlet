@@ -22,10 +22,11 @@ public class TimezoneValidateFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        if (timezoneParam.matches("^UTC[+%2B-](1[0-4]|[0-9])$")) {
+        if (timezoneParam.matches("^UTC[+-](1[0-4]|[0-9])$")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         } else {
+            req.setAttribute("invalidTimezone", timezoneParam);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             RequestDispatcher dispatcher = req.getRequestDispatcher("/WEB-INF/jsp/invalid-timezone.jsp");
             dispatcher.forward(req, resp);
