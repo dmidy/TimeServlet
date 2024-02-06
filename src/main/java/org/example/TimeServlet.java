@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 @WebServlet("/time")
 public class TimeServlet extends HttpServlet {
     @Override
@@ -17,18 +19,27 @@ public class TimeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         String timezone = request.getParameter("timezone");
-        TimeZone timeZoneInstance;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateTimeZone timeZone;
 
-        if (timezone == null){
+        if (timezone == null || timezone.isEmpty()){
             timezone = "UTC";
-            timeZoneInstance = TimeZone.getTimeZone(timezone);
+            timeZone = DateTimeZone.UTC;
         } else {
-            timeZoneInstance = TimeZone.getTimeZone(timezone);
+            int offsetHours = 0;
+            int offsetMinutes = 0;
+
+            if (timezone.startsWith("UTC+")) {
+                offsetHours = Integer.parseInt(timezone.substring(4));
+            } else if (timezone.startsWith("UTC-")) {
+                offsetHours = -Integer.parseInt(timezone.substring(4));
+            }
+
+            timeZone = DateTimeZone.forOffsetHoursMinutes(offsetHours, offsetMinutes);
         }
 
-        dateFormat.setTimeZone(timeZoneInstance);
-        String currentTime = dateFormat.format(new Date());
+        DateTime dateTime = DateTime.now(timeZone);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        String currentTime = dateTime.toString(formatter);
 
         request.setAttribute("currentTime", currentTime);
         request.setAttribute("timezone", timezone);
